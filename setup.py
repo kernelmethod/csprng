@@ -5,14 +5,7 @@ import shutil
 import subprocess
 import sys
 
-import torch
 from setuptools import find_packages, setup
-from torch.utils.cpp_extension import (
-    BuildExtension,
-    CppExtension,
-    CUDA_HOME,
-    CUDAExtension,
-)
 
 version = open("version.txt", "r").read().strip()
 sha = "Unknown"
@@ -52,19 +45,23 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 
-requirements = [
-    "torch",
-]
+with open("requirements.txt", "r") as fh:
+    requirements = fh.read().splitlines()
 
 
 def append_flags(flags, flags_to_append):
     for flag in flags_to_append:
-        if not flag in flags:
+        if flag not in flags:
             flags.append(flag)
     return flags
 
 
 def get_extensions():
+    from torch.utils.cpp_extension import (
+        CppExtension,
+        CUDAExtension,
+    )
+
     build_cuda = torch.cuda.is_available() or os.getenv("FORCE_CUDA", "0") == "1"
 
     module_name = "torchcsprng"
@@ -188,7 +185,6 @@ setup(
     # ext_modules=get_extensions(),
     test_suite="test",
     cmdclass={
-        "build_ext": BuildExtension,
         "clean": clean,
     },
 )
