@@ -7,6 +7,10 @@
 
 #pragma once
 
+#define _CSPRNG_SUBKEY_CTX    "randsubk"
+
+#include <sodium.h>
+
 #include <random>
 #include <ATen/Generator.h>
 #include <ATen/Tensor.h>
@@ -16,18 +20,18 @@
 #include "macros.h"
 #include "block_cipher.h"
 
-inline uint64_t make64BitsFrom32Bits(uint32_t hi, uint32_t lo) {
-  return (static_cast<uint64_t>(hi) << 32) | lo;
-}
-
 // CUDA CSPRNG is actually CPU generator which is used only to generate a random key on CPU for AES running in a block mode on CUDA
 struct CSPRNGGeneratorImpl : public c10::GeneratorImpl {
-  CSPRNGGeneratorImpl(bool use_rd)              : c10::GeneratorImpl{at::Device(at::DeviceType::CPU), at::DispatchKeySet(at::DispatchKey::CustomRNGKeyId)}, use_rd_{use_rd} {}
-  CSPRNGGeneratorImpl(const std::string& token) : c10::GeneratorImpl{at::Device(at::DeviceType::CPU), at::DispatchKeySet(at::DispatchKey::CustomRNGKeyId)}, use_rd_{true}, rd_{token} {}
-  CSPRNGGeneratorImpl(uint64_t seed)            : c10::GeneratorImpl{at::Device(at::DeviceType::CPU), at::DispatchKeySet(at::DispatchKey::CustomRNGKeyId)}, use_rd_{false}, mt_{static_cast<unsigned int>(seed)} { }
+  CSPRNGGeneratorImpl(at::Tensor key) : c10::GeneratorImpl{at::Device(at::DeviceType::CPU), at::DispatchKeySet(at::DispatchKey::CustomRNGKeyId)}, key_{key} {
+    if (key_.size(0) != crypto_kdf_KEYBYTES) {
+      throw std::runtime_error("received key of invalid length");
+    }
+  }
   ~CSPRNGGeneratorImpl() = default;
-  uint32_t random() { return use_rd_ ? rd_() : mt_(); }
-  uint64_t random64() { return use_rd_ ? make64BitsFrom32Bits(rd_(), rd_()) : make64BitsFrom32Bits(mt_(), mt_()); }
+
+  void random_subkey(uint8_t* subkey, size_t len) {
+    crypto_kdf_derive_from_key(subkey, len, counter++, _CSPRNG_SUBKEY_CTX, key());
+  }
 
   void set_current_seed(uint64_t seed) override { throw std::runtime_error("not implemented"); }
   uint64_t current_seed() const override { throw std::runtime_error("not implemented"); }
@@ -39,7 +43,8 @@ struct CSPRNGGeneratorImpl : public c10::GeneratorImpl {
   void set_state(const c10::TensorImpl& new_state) override { throw std::runtime_error("not implemented"); }
   c10::intrusive_ptr<c10::TensorImpl> get_state() const override { throw std::runtime_error("not implemented"); }
 
-  bool use_rd_;
-  std::random_device rd_;
-  std::mt19937 mt_;
+  uint8_t* key() { return key_.data_ptr<uint8_t>(); }
+
+  at::Tensor key_;
+  uint64_t counter = 0;
 };
