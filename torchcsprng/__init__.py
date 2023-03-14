@@ -9,7 +9,6 @@ import torch
 from functools import lru_cache
 from secrets import token_bytes
 from torch.utils.cpp_extension import load
-from torchcsprng._C import *
 from typing import Optional, Union
 from . import _modinfo
 
