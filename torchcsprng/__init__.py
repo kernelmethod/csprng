@@ -87,6 +87,12 @@ def create_generator(
     return module.create_generator_(key)
 
 
+def encrypt(*args):
+    return load_module().encrypt(*args)
+
+def decrypt(*args):
+    return load_module().decrypt(*args)
+
 try:
     from .version import __version__, git_version  # noqa: F401
 except ImportError:
