@@ -155,15 +155,16 @@ setup(
     # Metadata
     name=package_name,
     version=version,
-    author="Pavel Belevich",
-    author_email="pbelevich@fb.com",
-    url="https://github.com/pytorch/csprng",
+    author="kernelmethod",
+    author_email="17100608+kernelmethod@users.noreply.github.com",
+    url="https://github.com/kernelmethod/csprng",
     description="Cryptographically secure pseudorandom number generators for PyTorch",
     long_description=long_description,
     long_description_content_type="text/markdown",
     license="BSD-3",
     # Package info
     packages=find_packages(exclude=("test",)),
+    include_package_data=True,
     classifiers=[
         "Intended Audience :: Developers",
         "Intended Audience :: Education",
@@ -182,9 +183,9 @@ setup(
         "Topic :: Software Development :: Libraries",
         "Topic :: Software Development :: Libraries :: Python Modules",
     ],
-    python_requires=">=3.6",
+    python_requires=">=3.8",
     install_requires=requirements,
-    ext_modules=get_extensions(),
+    # ext_modules=get_extensions(),
     test_suite="test",
     cmdclass={
         "build_ext": BuildExtension,
