@@ -8,7 +8,15 @@ that it replaces `create_random_device_generator` and
 `create_mt19937_generator` with a single `create_generator` function, with uses
 HKDF-HMAC-Blake2b to generate subkeys for AES.
 
-To install it, you can run
+This library **has not** received an audit, and you should think carefully
+before using it in a production system.
+
+## Installation
+
+This fork of `torchcsprng` requires [libsodium](https://doc.libsodium.org/) to
+work correctly; you should install it before installing this library.
+
+Once you have libsodium installed, run:
 
 ```
 pip install git+https://github.com/kernelmethod/csprng.git@main
@@ -19,9 +27,6 @@ Alternatively, add the following to your `requirements.txt`:
 ```
 torchcsprng @ git+https://github.com/kernelmethod/csprng.git@main
 ```
-
-This library **has not** received an audit, and you should think carefully
-before using it in a production system.
 
 ---
 
