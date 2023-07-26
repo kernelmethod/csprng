@@ -20,7 +20,7 @@ def load_module(verbose: bool = True):
 
     cflags = ["-Wall", "-Wextra", "-Wno-unused", "-O3"]
     cuda_cflags = [
-        "-std=c++20",
+        "-std=c++17",
         f"--compiler-options={' '.join(cflags)!r}",
         "--expt-extended-lambda",
         "-Xcompiler",
