@@ -74,8 +74,9 @@ def create_generator(
     if isinstance(device, str):
         device = torch.device(device)
     if key is None:
-        key = torch.Tensor([b for b in token_bytes(REQUIRED_KEY_LENGTH)])
-        key = key.to(dtype=torch.uint8, device=device)
+        key = torch.tensor([b for b in token_bytes(REQUIRED_KEY_LENGTH)], dtype=torch.uint8)
+
+    key = key.to("cpu")
 
     if key.dtype != torch.uint8:
         raise ValueError("dtype of key must be torch.uint8")
